@@ -21,11 +21,26 @@ Idées de projet:
         ~Pendu
         ~Snake
         ~Jeu de réaction 
+        ~Jeu d’énigmes
         ~etc
 -Générateur de playlist
+    avec calcul de durée artistes etc 
 -Moyennes ED like
 -Calendrier/Agenda 
+    possibilité d'ajout d'event ett dans différentes catégories 
 -Générateur de mdp/pseudo
+    peut etre compris avec le vérificateur
+-Vérification de sécurité du mdp/pseudo
+    peut etre compris avec le générateur
+-Générateur de programme sportif
+    pour atteindre certains objectifs 
+-Prédicteur de météo
+    a partir d'un pack de données existant
+-Whiteboard
+    pour ajouter des idées des trucs à faire etc
+    
+
+
 
 
 
