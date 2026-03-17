@@ -36,9 +36,9 @@ Idées de projet:
     pour atteindre certains objectifs 
 -Prédicteur de météo
     a partir d'un pack de données existant
--Whiteboard
+-Whiteboard/notes
     pour ajouter des idées des trucs à faire etc
-    
+
 
 
 
