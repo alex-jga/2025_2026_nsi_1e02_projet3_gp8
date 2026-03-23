@@ -89,7 +89,12 @@ Page d'acceuil qui propose 6 jeux (fenêtre principale) :
         Fenêtre d'acceuil avec 2 boutons :
         → Deux possibilitées de jeu J1 vs J2 et J1 vs IA (randomizer)
         → le joueur gagne dès qu'il aligne 3 symboles
-
         → Dès qu'une partie est fini retour accueil 
         → Bouton retour à l'acceuil (Supprime la fenêtre)
         → algorithme qui apprend à jouer donc partie de plus en plus compliqué 
+
+Calendrier :
+D'ici le 31 mars faire un bon morpion avec interface graphique et J1 VS J2 puis avec le cours rajouter un algorithme d'apprentissage 
+qui avec les parties des joueurs va s'instruire pour ne plus perdre 
+
+
