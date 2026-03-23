@@ -58,6 +58,8 @@ Page d'acceuil qui propose 6 jeux (fenêtre principale) :
         → le joueur gagne dès qu'il aligne 3 symboles
         → Dès qu'une partie est fini retour accueil 
         → Bouton retour à l'acceuil (Supprime la fenêtre)
+        → algorithme qui apprend à jouer 
+
 
     3. Pendu (sous fenêtre)
         A partir d'une base de données (ex: dictionnaire francais)
@@ -70,16 +72,24 @@ Page d'acceuil qui propose 6 jeux (fenêtre principale) :
         A partir d'un randomizer qui séléctionne un nombre au hasard
         → Le joueur gagne lorsqu'il donne le bon nombre
         → 5 chances
+
     5. Jeu de calcul (sous fenêtre)
         → on affiche des opérations aléatoires dans un temps limité
         → l'utilisateur perd lorsque sa réponse est fausse ou le délai n'est pas respecté
 
-    6. Jackpot : 
+    6. Jackpot (sous fenêtre) : 
        → Tentez votre chance en activant le tirage aléatoire.
        → 3 cases de numéros générés dynamiquement.
        → Bouton lancer
        → L'utilisateur gagne lorsque 3 nombres identiques sont alignés
 
+###############################################################################################################################################
 
+2. Morpion (sous fenêtre)
+        Fenêtre d'acceuil avec 2 boutons :
+        → Deux possibilitées de jeu J1 vs J2 et J1 vs IA (randomizer)
+        → le joueur gagne dès qu'il aligne 3 symboles
 
-
+        → Dès qu'une partie est fini retour accueil 
+        → Bouton retour à l'acceuil (Supprime la fenêtre)
+        → algorithme qui apprend à jouer donc partie de plus en plus compliqué 
