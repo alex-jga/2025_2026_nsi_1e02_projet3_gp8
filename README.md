@@ -85,7 +85,7 @@ Page d'acceuil qui propose 6 jeux (fenêtre principale) :
 
 ###############################################################################################################################################
 
-2. Morpion (sous fenêtre)
+2. Morpion
         Fenêtre d'acceuil avec 2 boutons :
         → Deux possibilitées de jeu J1 vs J2 et J1 vs IA (randomizer)
         → le joueur gagne dès qu'il aligne 3 symboles
@@ -97,4 +97,17 @@ Calendrier :
 D'ici le 31 mars faire un bon morpion avec interface graphique et J1 VS J2 puis avec le cours rajouter un algorithme d'apprentissage 
 qui avec les parties des joueurs va s'instruire pour ne plus perdre 
 
+Plan du morpion:
+
+Architecture MVC:
+Main qui appelle le controller et le view 
+
+Création d'une premiere fenetre d'accueil qui propose 2 choix (2 boutons avec tkinter):
+    → J1 vs J2
+    → J1 vs Algorithme d'apprentissage
+
+1ere sous fenetre J1 vs J2:
+
+Affiche le tableau et un bouton pour commencer la partie
+Puis ajouter des cases clickables
 
