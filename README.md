@@ -111,3 +111,4 @@ Création d'une premiere fenetre d'accueil qui propose 2 choix (2 boutons avec t
 Affiche le tableau et un bouton pour commencer la partie
 Puis ajouter des cases clickables
 
+https://chatgpt.com/s/t_69d5109b29ac8191ba57eb4270371410
