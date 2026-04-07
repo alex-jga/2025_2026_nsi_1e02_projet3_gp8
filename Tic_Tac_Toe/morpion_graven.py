@@ -67,7 +67,7 @@ def check_winner():
  
     if (turns == 9):
         game_over = True
-        label.config(text="Egalité !", foreground=color_yellow)
+        label.config(text="Egalité !", foreground=color_red)
 
 
 def new_game():
@@ -82,7 +82,11 @@ def new_game():
         for column in range(3):
             board[row][column].config(text="", foreground=color_blue, background=color_gray)
 
+def open_window_j1_vs_j2():
+    window_j1_vs_j2.deiconify()
 
+def open_window_j1_vs_ia():
+    pass
 
 playerX = "X"
 playerO = "O"
@@ -92,6 +96,7 @@ board = [[0, 0, 0],
          [0, 0, 0]]
 
 color_blue = "#4584b6"
+color_red = "#d81832"
 color_yellow = "#ffde57"
 color_gray = "#343434"
 color_light_gray = "#646464"
@@ -99,11 +104,31 @@ color_light_gray = "#646464"
 turns = 0
 game_over = False
 
-window = tkinter.Tk()
-window.title("Tic Tac Toe")
-window.resizable(False, False)
+window_main = tkinter.Tk()
 
-frame = tkinter.Frame(window)
+frame_main = tkinter.Frame(window_main, background=color_gray)
+
+label_main = tkinter.Label(frame_main , text=" Voulez-vous jouer contre un ami, une ia ou vous-même ?", font=("Consolas", 20),
+                            background=color_gray, foreground="white")
+label_main.pack()
+
+button_main_j1_vs_j2 = tkinter.Button(frame_main, text="J1 versus J2 (Contre un ami ou contre vous même)", font=("Consolas", 20), background=color_gray,
+                        foreground="white", command=open_window_j1_vs_j2)
+
+button_main_j1_vs_ia = tkinter.Button(frame_main, text="J1 versus IA (bientôt)", font=("Consolas", 20),
+                        background=color_gray, foreground="white", command=open_window_j1_vs_ia)
+button_main_j1_vs_ia.pack()
+
+frame_main.pack()
+button_main_j1_vs_j2.pack()
+
+window_j1_vs_j2 = tkinter.Tk()
+window_j1_vs_j2.title("Tic Tac Toe")
+window_j1_vs_j2.resizable(False, False)
+
+window_j1_vs_j2.withdraw()
+
+frame = tkinter.Frame(window_j1_vs_j2)
 label = tkinter.Label(frame, text=" Au tour de " + curr_player, font=("Consolas", 20), background=color_gray,
                       foreground="white")
 label.grid(row=0, column=0, columnspan=3, sticky="we")
@@ -122,16 +147,16 @@ button.grid(row=4, column=0, columnspan=3, sticky="we")
 frame.pack()
 
 
-window.update()
-window_width = window.winfo_width()
-window_height = window.winfo_height()
-screen_width = window.winfo_screenwidth()
-screen_height = window.winfo_screenheight()
+window_j1_vs_j2.update()
+window_width = window_j1_vs_j2.winfo_width()
+window_height = window_j1_vs_j2.winfo_height()
+screen_width = window_j1_vs_j2.winfo_screenwidth()
+screen_height = window_j1_vs_j2.winfo_screenheight()
 
 window_x = int((screen_width/2) - (window_width/2))
 window_y = int((screen_height/2) - (window_height/2))
 
 
-window.geometry(f"{window_width}x{window_height}+{window_x}+{window_y}")
+window_j1_vs_j2.geometry(f"{window_width}x{window_height}+{window_x}+{window_y}")
 
-window.mainloop()
+window_main.mainloop()
