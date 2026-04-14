@@ -69,7 +69,6 @@ def check_winner():
         game_over = True
         label.config(text="Egalité !", foreground=color_red)
 
-
 def new_game():
     global turns, game_over
 
@@ -81,6 +80,9 @@ def new_game():
     for row in range(3):
         for column in range(3):
             board[row][column].config(text="", foreground=color_blue, background=color_gray)
+
+def retour_menu():
+    window_j1_vs_j2.destroy()
 
 def open_window_j1_vs_j2():
     window_j1_vs_j2.deiconify()
@@ -143,6 +145,15 @@ for row in range(3):
 button = tkinter.Button(frame, text="Rejouer", font=("Consolas", 20), background=color_gray,
                         foreground="white", command=new_game)
 button.grid(row=4, column=0, columnspan=3, sticky="we")
+
+button = tkinter.Button(frame, text="Retourner au menu", font=("Consolas", 20), background=color_gray,
+                        foreground="white", command=retour_menu)
+button.grid(row=5, column=0, columnspan=3, sticky="we")
+
+button = tkinter.Button(frame, text="Quitter le jeu", font=("Consolas", 20), background=color_gray,
+                        foreground="white", command=quit)
+button.grid(row=6, column=0, columnspan=3, sticky="we")
+
 
 frame.pack()
 
