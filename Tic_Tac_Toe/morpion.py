@@ -69,7 +69,6 @@ def check_winner():
         game_over = True
         label.config(text="Egalité !", foreground=color_red)
 
-
 def new_game():
     global turns, game_over
 
@@ -82,9 +81,14 @@ def new_game():
         for column in range(3):
             board[row][column].config(text="", foreground=color_blue, background=color_gray)
 
+def retour_menu():
+    window_j1_vs_j2.withdraw()
+
 def open_window_j1_vs_j2():
     window_j1_vs_j2.deiconify()
 
+def open_window_j1_vs_ia():
+    pass
 
 playerX = "X"
 playerO = "O"
@@ -104,21 +108,26 @@ game_over = False
 
 window_main = tkinter.Tk()
 
-frame_main = tkinter.Frame(window_main)
+frame_main = tkinter.Frame(window_main, background=color_gray)
 
 label_main = tkinter.Label(frame_main , text=" Voulez-vous jouer contre un ami, une ia ou vous-même ?", font=("Consolas", 20),
-                            background=color_gray, foreground=color_gray)
+                            background=color_gray, foreground="white")
 label_main.pack()
 
 button_main_j1_vs_j2 = tkinter.Button(frame_main, text="J1 versus J2 (Contre un ami ou contre vous même)", font=("Consolas", 20), background=color_gray,
-                        foreground=color_gray, command=open_window_j1_vs_j2)
+                        foreground="white", command=open_window_j1_vs_j2)
 
 button_main_j1_vs_ia = tkinter.Button(frame_main, text="J1 versus IA (bientôt)", font=("Consolas", 20),
-                        background=color_gray, foreground="white")
-button_main_j1_vs_ia.pack()
+                        background=color_gray, foreground="white", command=open_window_j1_vs_ia)
+
+button_main = tkinter.Button(frame_main, text="Quitter le jeu", font=("Consolas", 20), background=color_gray,
+                        foreground="white", command=quit)
+
 
 frame_main.pack()
 button_main_j1_vs_j2.pack()
+button_main_j1_vs_ia.pack()
+button_main.pack()
 
 window_j1_vs_j2 = tkinter.Tk()
 window_j1_vs_j2.title("Tic Tac Toe")
@@ -141,6 +150,15 @@ for row in range(3):
 button = tkinter.Button(frame, text="Rejouer", font=("Consolas", 20), background=color_gray,
                         foreground="white", command=new_game)
 button.grid(row=4, column=0, columnspan=3, sticky="we")
+
+button = tkinter.Button(frame, text="Retourner au menu", font=("Consolas", 20), background=color_gray,
+                        foreground="white", command=retour_menu)
+button.grid(row=5, column=0, columnspan=3, sticky="we")
+
+button = tkinter.Button(frame, text="Quitter le jeu", font=("Consolas", 20), background=color_gray,
+                        foreground="white", command=quit)
+button.grid(row=6, column=0, columnspan=3, sticky="we")
+
 
 frame.pack()
 
