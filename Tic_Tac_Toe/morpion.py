@@ -88,7 +88,7 @@ def open_window_j1_vs_j2():
     window_j1_vs_j2.deiconify()
 
 def open_window_j1_vs_ia():
-    pass
+    window_j1_vs_ia.deiconify()
 
 playerX = "X"
 playerO = "O"
@@ -96,6 +96,10 @@ curr_player = playerX
 board = [[0, 0, 0], 
          [0, 0, 0], 
          [0, 0, 0]]
+
+board_ia = [["A1", "A2", "A3"], 
+           ["B1", "B2", "B3"], 
+           ["C1", "C2", "C3"]]
 
 color_blue = "#4584b6"
 color_red = "#d81832"
@@ -128,6 +132,24 @@ frame_main.pack()
 button_main_j1_vs_j2.pack()
 button_main_j1_vs_ia.pack()
 button_main.pack()
+
+window_j1_vs_ia = tkinter.Tk()
+window_j1_vs_ia.title("Tic Tac Toe")
+window_j1_vs_ia.resizable(False,False)
+
+window_j1_vs_ia.withdraw()
+
+frame = tkinter.Frame(window_j1_vs_ia)
+label = tkinter.Label(frame, text=" Au tour de " + curr_player, font=("Consolas", 20), background=color_gray,
+                      foreground="white")
+label.grid(row=0, column=0, columnspan=3, sticky="we")
+
+for row in range(3):
+    for column in range(3):
+        board_ia[row][column] = tkinter.Button(frame, text="", font=("Consolas", 50, "bold"),
+                                            background=color_gray, foreground=color_blue, width=4, height=1,
+                                            command=lambda row=row, column=column: set_tile(row, column))
+        board_ia[row][column].grid(row=row+1, column=column)
 
 window_j1_vs_j2 = tkinter.Tk()
 window_j1_vs_j2.title("Tic Tac Toe")
