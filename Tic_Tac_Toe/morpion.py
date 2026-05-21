@@ -1,6 +1,6 @@
 import tkinter
 import math
-
+from login import window_login
 
 
 def set_tile(row, column):
@@ -246,6 +246,6 @@ window_x = int((window_game.winfo_screenwidth()/2) - (window_game.winfo_width()/
 window_y = int((window_game.winfo_screenheight()/2) - (window_game.winfo_height()/2))
 window_game.geometry(f"+{window_x}+{window_y}")
 
-window_main.mainloop()
+window_login.mainloop()
 
 
