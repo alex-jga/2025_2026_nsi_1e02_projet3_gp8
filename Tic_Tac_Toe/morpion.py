@@ -18,7 +18,7 @@ def set_tile(row, column):
         curr_player = playerO
         label["text"] = " Au tour de " + curr_player
         label.update()
-        window_game.after(400, ai_make_move) 
+        window_game.after(0, ai_make_move) 
     
     
     elif not game_over:
@@ -202,7 +202,7 @@ label_main.pack(pady=10)
 btn_j1_v_j2 = tkinter.Button(frame_main, text="Joueur 1 vs Joueur 2", font=("Consolas", 16), background=color_gray, foreground="white", command=lambda: lancer_partie(False))
 btn_j1_v_j2.pack(fill="x", pady=5)
 
-btn_j1_v_ia = tkinter.Button(frame_main, text="Joueur 1 vs IA (Minimax)", font=("Consolas", 16), background=color_gray, foreground="white", command=lambda: lancer_partie(True))
+btn_j1_v_ia = tkinter.Button(frame_main, text="Joueur 1 vs IA", font=("Consolas", 16), background=color_gray, foreground="white", command=lambda: lancer_partie(True))
 btn_j1_v_ia.pack(fill="x", pady=5)
 
 btn_quit = tkinter.Button(frame_main, text="Quitter le jeu", font=("Consolas", 16), background=color_gray, foreground="white", command=quit)
@@ -247,3 +247,5 @@ window_y = int((window_game.winfo_screenheight()/2) - (window_game.winfo_height(
 window_game.geometry(f"+{window_x}+{window_y}")
 
 window_main.mainloop()
+
+
