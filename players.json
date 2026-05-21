@@ -1,0 +1,16 @@
+{
+    "evil_lightskin": {
+        "password": "louis*",
+        "played": 20,
+        "wins": 0,
+        "loses": 10,
+        "ties": 10
+    },
+    "alex": {
+        "password": "alex",
+        "played": 1,
+        "wins": 0,
+        "loses": 0,
+        "ties": 1
+    }
+}
