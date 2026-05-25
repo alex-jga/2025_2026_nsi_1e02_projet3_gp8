@@ -8,9 +8,9 @@
     },
     "alex": {
         "password": "alex",
-        "played": 5,
+        "played": 11,
         "wins": 0,
-        "loses": 3,
-        "ties": 2
+        "loses": 7,
+        "ties": 4
     }
 }

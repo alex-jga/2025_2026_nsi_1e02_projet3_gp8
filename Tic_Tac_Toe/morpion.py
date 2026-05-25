@@ -53,14 +53,14 @@ COLOR_TEXT_MUTED = "#555A64"     # Gris technique pour les infos secondaires
 COLOR_INTERFACE_BORDER = "#22252C" # Bordures de l'interface
 
 def get_custom_fonts():
-    # Utilisation de polices d'impact pour un effet lourd et pro
+    
     font_title = ("Impact", 28)
     font_stats = ("Arial", 10, "bold")
     font_btn = ("Impact", 14)
     font_grid = ("Impact", 55)
     return font_title, font_stats, font_btn, font_grid
 
-# --- REPRISE DE LA LOGIQUE ET DE L'AUTHENTIFICATION ---
+
 def load_data():
     if not os.path.exists(DATA_FILE): return {}
     try:
@@ -129,7 +129,7 @@ def update_stats_label():
         text=f"COMBATTANT : {current_username.upper()}\n[ MATCHS : {stats['played']}  |  VICTOIRES : {stats['wins']}  |  DÉFAITES : {stats['loses']} ]"
     )
 
-# --- ENROULEMENT DE LA LOGIQUE DE JEU AGRESSIVE ---
+
 def set_tile(row, column):
     global curr_player, game_over
     if game_over or board[row][column]["text"] != "": return
@@ -165,7 +165,7 @@ def ai_make_move():
             curr_player = playerX
             label.config(text=f"JOUEUR {curr_player}", foreground=COLOR_RED_NEON)
 
-# --- ALGORITHME DE PREDATION (MINIMAX) ---
+
 def best_move():
     best_score = -math.inf
     move = None
@@ -219,7 +219,7 @@ def check_winner_sim(b):
             if b[r][c] == "": return None
     return "Tie"
 
-# --- CALCULE DE DESTRUCTION ET VERDICT ---
+
 def check_winner():
     global turns, game_over
     turns += 1
@@ -239,17 +239,17 @@ def check_winner():
         return
     if turns == 9:
         game_over = True
-        label.config(text="ÉGALITÉ COLD... IMPASSE RECONNU.", foreground=COLOR_TEXT_MUTED)
+        label.config(text="ÉGALITE.", foreground=COLOR_TEXT_MUTED)
         update_stats("tie")
 
 def highlight_winner(player, tiles):
     global game_over
     game_over = True
     if player == playerX:
-        label.config(text=f"DOMINATION : JOUEUR {player} ÉCRASE LA PARTIE !", foreground=COLOR_RED_NEON)
+        label.config(text=f"JOUEUR {player} A GAGNE ", foreground=COLOR_RED_NEON)
         update_stats("win")
     else:
-        label.config(text=f"ANNIHILATION", foreground=COLOR_GREEN_NEON)
+        label.config(text=f"JOUEUR {player} A GAGNE", foreground=COLOR_GREEN_NEON)
         update_stats("lose")
         
     for row, col in tiles:
@@ -270,11 +270,11 @@ def new_game():
         curr_player = playerX
 
     color_info = COLOR_RED_NEON if curr_player == playerX else COLOR_GREEN_NEON
-    text_info = f"SÉQUENCE : JOUEUR {curr_player}" if not mode_ia else (f"ENGAGEMENT REQUIS ({curr_player})" if curr_player == playerX else "L'IA ENGAGE L'ASSAUT (O)")
+    text_info = f"SÉQUENCE : JOUEUR {curr_player}" if not mode_ia else (f"TOUR : ({curr_player})" if curr_player == playerX else "L'IA ENGAGE L'ASSAUT (O)")
     label.config(text=text_info, foreground=color_info)
 
     if mode_ia and curr_player == playerO:
-        label.config(text="L'IA PREND LE CONTRÔLE...", foreground=COLOR_GREEN_NEON)
+        label.config(text="TOUR : IA", foreground=COLOR_GREEN_NEON)
         window_game.after(100, ai_make_move)
 
 def retour_menu():
@@ -502,7 +502,7 @@ def _rl_stop_demo():
     ql_btn_demo.config(text="🎯  DÉMO (exploitation)")
 
 
-# --- CONSTRUCTEUR DE L'INTERFACE CADRÉE ET SOMBRE ---
+
 window_login = tkinter.Tk()
 window_login.title("CONNEXION")
 window_login.config(background=COLOR_DEEP_BLACK)
@@ -510,7 +510,7 @@ window_login.geometry("400x520")
 
 f_title, f_stats, f_btn, f_grid = get_custom_fonts()
 
-# Bouton de Commande Style Terminal
+
 def create_gaming_button(parent, text, command, bg_color, hover_color, font, fg_color="white", border_c=COLOR_INTERFACE_BORDER, pady=6):
     btn = tkinter.Button(
         parent, text=text, font=font, background=bg_color, foreground=fg_color,
@@ -522,7 +522,7 @@ def create_gaming_button(parent, text, command, bg_color, hover_color, font, fg_
     btn.bind("<Leave>", lambda e: btn.config(background=bg_color))
     return btn
 
-# LOGIN FRAME
+
 frame_login = tkinter.Frame(window_login, background=COLOR_DEEP_BLACK)
 frame_login.pack(expand=True, padx=40, fill="x")
 
@@ -541,7 +541,7 @@ create_gaming_button(frame_login, "CONNEXION", lambda: auth("login"), COLOR_RED_
 create_gaming_button(frame_login, "NOUVEAU PROFIL", lambda: auth("register"), COLOR_TILE_BG, "#171A21", f_btn, fg_color=COLOR_TEXT_MUTED, pady=2)
 
 
-# MENU FRAME
+
 window_main = tkinter.Toplevel()
 window_main.title("MENU")
 window_main.config(background=COLOR_DEEP_BLACK)
@@ -575,7 +575,7 @@ create_gaming_button(frame_main, "DECONNEXION", logout, COLOR_DEEP_BLACK, COLOR_
 create_gaming_button(frame_main, "ÉTEINDRE LE SYSTÈME", quit, "#73001C", "#4A0012", f_btn, pady=10)
 
 
-# GAME WINDOW (GRILLE HAUTE DÉFINITION INTIMIDANTE)
+
 window_game = tkinter.Toplevel()
 window_game.title("JEU")
 window_game.resizable(False, False)
@@ -583,11 +583,11 @@ window_game.withdraw()
 window_game.config(background=COLOR_DEEP_BLACK)
 window_game.protocol("WM_DELETE_WINDOW", quit)
 
-# Indicateur de menace
+
 label = tkinter.Label(window_game, text=f"TOUR : JOUEUR {curr_player}", font=("Impact", 18), background=COLOR_DEEP_BLACK, foreground=COLOR_RED_NEON)
 label.pack(pady=20)
 
-# Le conteneur génère des lignes 4K ultra-fines et agressives
+
 grid_container = tkinter.Frame(window_game, background=COLOR_GRID_LINE, bd=0)
 grid_container.pack(padx=30, pady=5)
 
@@ -606,7 +606,7 @@ for row in range(3):
             height=1,
             cursor="hand2"
         )
-        # Espacement de 4px pour un quadrillage ultra-net et contrasté
+        
         btn.grid(row=row, column=column, padx=4, pady=4) 
         btn.config(command=lambda r=row, c=column: set_tile(r, c))
         
@@ -629,7 +629,7 @@ create_gaming_button(frame_controls, "REJOUER", new_game, COLOR_TILE_BG, "#171A2
 create_gaming_button(frame_controls, "ABANDONNER / MENU", retour_menu, COLOR_DEEP_BLACK, COLOR_TILE_BG, ("Arial", 10, "bold"), fg_color=COLOR_TEXT_MUTED, pady=2)
 
 
-# --- FENÊTRE ENTRAÎNEMENT IA vs IA (Q-LEARNING) ---
+
 window_rl = tkinter.Toplevel()
 window_rl.title("Q-Learning — IA vs IA")
 window_rl.config(background=COLOR_DEEP_BLACK)
@@ -785,7 +785,6 @@ create_gaming_button(
     fg_color=COLOR_TEXT_MUTED, pady=4,
 )
 
-# Chargement automatique si table Q présente
 _default_qt = os.path.join(_SCRIPT_DIR, QTABLE_DEFAULT)
 if os.path.exists(_default_qt):
     try:
