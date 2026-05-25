@@ -1,10 +1,26 @@
 import os
+import sys
+import threading
 import tkinter
-from tkinter import messagebox
+from tkinter import messagebox, filedialog, ttk
 import math
 import json
 import random
 from tkinter import font as tkfont
+
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+if _SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPT_DIR)
+
+from qlearning import (
+    QLearningAgent,
+    TicTacToeEnv,
+    run_training_episode,
+    q_move_for_player,
+    board_to_key,
+    check_winner_cells,
+    QTABLE_DEFAULT,
+)
 
 DATA_FILE = "players.json"
 
@@ -18,6 +34,12 @@ turns = 0
 game_over = False
 
 current_username = None
+
+ql_agent = QLearningAgent()
+ql_env = TicTacToeEnv()
+ql_training_active = False
+ql_demo_active = False
+ql_demo_steps = [0]
 
 # --- PALETTE CYBERPUNK INTIMIDANTE & ULTRA-HD ---
 COLOR_DEEP_BLACK = "#050508"     # Fond ultra-sombre (OLED Black)
@@ -132,7 +154,9 @@ def set_tile(row, column):
 def ai_make_move():
     global curr_player
     if game_over: return
-    move = best_move()
+    move = q_move_for_player(ql_agent, board, playerO)
+    if move is None:
+        move = best_move()
     if move:
         row, column = move
         board[row][column].config(text=playerO, foreground=COLOR_GREEN_NEON, activeforeground=COLOR_GREEN_NEON)
@@ -265,6 +289,219 @@ def lancer_partie(ia_mode):
     window_game.deiconify()
 
 
+def ouvrir_entrainement_rl():
+    """Ouvre la fenêtre d'entraînement IA vs IA (Q-learning)."""
+    window_main.withdraw()
+    window_rl.deiconify()
+    _rl_refresh_stats()
+    _rl_log("Prêt. Lancez l'apprentissage ou chargez une table Q.")
+
+
+def retour_menu_depuis_rl():
+    _rl_stop_training()
+    _rl_stop_demo()
+    window_rl.withdraw()
+    window_main.deiconify()
+
+
+def _rl_log(msg):
+    rl_log.insert(tkinter.END, msg + "\n")
+    rl_log.see(tkinter.END)
+
+
+def _rl_refresh_stats():
+    total = max(1, ql_agent.episode_count)
+    rl_lbl_episode.config(text=str(ql_agent.episode_count))
+    rl_lbl_epsilon.config(text=f"{ql_agent.epsilon:.3f}")
+    rl_lbl_wins.config(
+        text=f"X:{ql_agent.win_x}  O:{ql_agent.win_o}  Nuls:{ql_agent.ties}"
+    )
+    if ql_agent.episode_count:
+        pct = (ql_agent.win_x + ql_agent.win_o + ql_agent.ties) / total * 100
+        rl_lbl_rate.config(text=f"{pct:.0f}% parties terminées")
+    else:
+        rl_lbl_rate.config(text="—")
+
+
+def _rl_update_grid_from_cells(cells):
+    for r in range(3):
+        for c in range(3):
+            v = cells[r * 3 + c]
+            btn = rl_board[r][c]
+            if v == playerX:
+                btn.config(text=playerX, foreground=COLOR_RED_NEON)
+            elif v == playerO:
+                btn.config(text=playerO, foreground=COLOR_GREEN_NEON)
+            else:
+                btn.config(text="", foreground=COLOR_TEXT_MUTED)
+
+
+def _rl_training_loop(n_episodes):
+    global ql_training_active
+    ql_agent.alpha = float(rl_spin_alpha.get())
+    ql_agent.gamma = float(rl_spin_gamma.get())
+
+    for ep in range(n_episodes):
+        if not ql_training_active:
+            break
+        run_training_episode(ql_agent, ql_env)
+        ql_agent.decay_epsilon()
+        ql_agent.episode_count += 1
+
+        if ep % 10 == 0:
+            last_cells = list(ql_env.cells)
+            ep_num = ql_agent.episode_count
+            eps = ql_agent.epsilon
+            wx, wo, ties = ql_agent.win_x, ql_agent.win_o, ql_agent.ties
+            window_rl.after(
+                0,
+                lambda c=last_cells, n=ep_num, e=eps, x=wx, o=wo, t=ties: (
+                    _rl_update_grid_from_cells(c),
+                    rl_progress.config(value=n),
+                    rl_lbl_episode.config(text=str(n)),
+                    rl_lbl_epsilon.config(text=f"{e:.3f}"),
+                    rl_lbl_wins.config(text=f"X:{x}  O:{o}  Nuls:{t}"),
+                ),
+            )
+
+    window_rl.after(0, _rl_on_training_finished)
+
+
+def _rl_on_training_finished():
+    global ql_training_active
+    ql_training_active = False
+    ql_btn_train.config(text="▶  APPRENTISSAGE (Q-learning)")
+    rl_progress.pack_forget()
+    _rl_refresh_stats()
+    _rl_log(
+        f"Entraînement terminé — {ql_agent.episode_count} épisodes | "
+        f"états appris : {len(ql_agent.q_table)}"
+    )
+
+
+def _rl_start_training():
+    global ql_training_active
+    if ql_training_active:
+        return
+    n = int(rl_spin_episodes.get())
+    ql_agent.epsilon = 1.0
+    ql_training_active = True
+    ql_btn_train.config(text="⏹  ARRÊTER")
+    rl_progress.config(maximum=n, value=0)
+    rl_progress.pack(fill="x", pady=(0, 8))
+    _rl_log(f"Début : {n} épisodes | α={ql_agent.alpha} | γ={ql_agent.gamma}")
+    threading.Thread(
+        target=_rl_training_loop, args=(n,), daemon=True
+    ).start()
+
+
+def _rl_stop_training():
+    global ql_training_active
+    ql_training_active = False
+
+
+def _rl_toggle_training():
+    if ql_training_active:
+        _rl_stop_training()
+        ql_btn_train.config(text="▶  APPRENTISSAGE (Q-learning)")
+        rl_progress.pack_forget()
+        _rl_log("Entraînement interrompu.")
+    else:
+        _rl_start_training()
+
+
+def _rl_save_qtable():
+    path = filedialog.asksaveasfilename(
+        defaultextension=".json",
+        filetypes=[("JSON", "*.json")],
+        initialfile=QTABLE_DEFAULT,
+        initialdir=_SCRIPT_DIR,
+    )
+    if path:
+        ql_agent.save_q_table(path)
+        _rl_log(f"Table Q sauvegardée : {path}")
+
+
+def _rl_load_qtable():
+    path = filedialog.askopenfilename(
+        filetypes=[("JSON", "*.json")],
+        initialdir=_SCRIPT_DIR,
+    )
+    if path:
+        try:
+            ql_agent.load_q_table(path)
+            _rl_refresh_stats()
+            _rl_log(f"Table Q chargée : {path} ({len(ql_agent.q_table)} états)")
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Chargement impossible : {e}")
+
+
+def _rl_reset_agent():
+    global ql_agent
+    if messagebox.askyesno("Reset", "Effacer la table Q et les statistiques ?"):
+        ql_agent = QLearningAgent()
+        _rl_update_grid_from_cells([""] * 9)
+        _rl_refresh_stats()
+        _rl_log("Table Q réinitialisée.")
+
+
+def _rl_demo_step():
+    if not ql_demo_active or not ql_agent.is_trained():
+        return
+
+    valid = ql_env.valid_actions()
+    if not valid:
+        ql_env.reset()
+        _rl_update_grid_from_cells(ql_env.cells)
+        if ql_demo_active:
+            window_rl.after(int(rl_spin_speed.get()), _rl_demo_step)
+        return
+
+    state_key = board_to_key(ql_env.cells, ql_env.current)
+    action = ql_agent.choose_best_action(state_key, valid)
+    if action is None:
+        _rl_stop_demo()
+        return
+
+    _, reward, done = ql_env.step(action)
+    _rl_update_grid_from_cells(ql_env.cells)
+
+    if done:
+        w = check_winner_cells(ql_env.cells)
+        _rl_log(f"Démo — fin de partie : {w} (r={reward:+.1f})")
+        ql_env.reset()
+        _rl_update_grid_from_cells(ql_env.cells)
+
+    if ql_demo_active:
+        window_rl.after(int(rl_spin_speed.get()), _rl_demo_step)
+
+
+def _rl_start_demo():
+    global ql_demo_active
+    if not ql_agent.is_trained():
+        messagebox.showwarning(
+            "Table Q vide",
+            "Entraînez l'agent ou chargez une table Q avant la démo.",
+        )
+        return
+    if ql_demo_active:
+        _rl_stop_demo()
+        return
+    ql_demo_active = True
+    ql_demo_steps[0] = 0
+    ql_env.reset()
+    _rl_update_grid_from_cells(ql_env.cells)
+    ql_btn_demo.config(text="⏹  ARRÊTER DÉMO")
+    _rl_log("Démonstration IA vs IA (politique apprise)…")
+    window_rl.after(int(rl_spin_speed.get()), _rl_demo_step)
+
+
+def _rl_stop_demo():
+    global ql_demo_active
+    ql_demo_active = False
+    ql_btn_demo.config(text="🎯  DÉMO (exploitation)")
+
+
 # --- CONSTRUCTEUR DE L'INTERFACE CADRÉE ET SOMBRE ---
 window_login = tkinter.Tk()
 window_login.title("CONNEXION")
@@ -310,7 +547,7 @@ window_main.title("MENU")
 window_main.config(background=COLOR_DEEP_BLACK)
 window_main.withdraw()
 window_main.protocol("WM_DELETE_WINDOW", quit)
-window_main.geometry("420x540")
+window_main.geometry("420x600")
 
 frame_main = tkinter.Frame(window_main, background=COLOR_DEEP_BLACK)
 frame_main.pack(expand=True, padx=40, fill="x")
@@ -321,6 +558,17 @@ label_stats.pack(pady=(0, 30))
 
 create_gaming_button(frame_main, "[ P2P ]  DUEL LOCAL", lambda: lancer_partie(False), COLOR_TILE_BG, "#171A21", f_btn, pady=8)
 create_gaming_button(frame_main, "[ P2IA ]  AFFRONTER L'IA", lambda: lancer_partie(True), COLOR_TILE_BG, COLOR_TILE_HOVER, f_btn, fg_color=COLOR_GREEN_NEON, border_c=COLOR_GREEN_NEON, pady=8)
+create_gaming_button(
+    frame_main,
+    "[ IA×IA ]  ENTRAÎNEMENT Q-LEARNING",
+    ouvrir_entrainement_rl,
+    "#1a237e",
+    "#283593",
+    f_btn,
+    fg_color="#90caf9",
+    border_c="#3949ab",
+    pady=8,
+)
 
 tkinter.Frame(frame_main, height=2, bg=COLOR_INTERFACE_BORDER).pack(fill="x", pady=25)
 create_gaming_button(frame_main, "DECONNEXION", logout, COLOR_DEEP_BLACK, COLOR_TILE_BG, ("Arial", 10, "bold"), fg_color=COLOR_TEXT_MUTED, pady=2)
@@ -379,5 +627,170 @@ frame_controls.pack(padx=30, pady=25, fill="x")
 
 create_gaming_button(frame_controls, "REJOUER", new_game, COLOR_TILE_BG, "#171A21", f_btn, pady=4)
 create_gaming_button(frame_controls, "ABANDONNER / MENU", retour_menu, COLOR_DEEP_BLACK, COLOR_TILE_BG, ("Arial", 10, "bold"), fg_color=COLOR_TEXT_MUTED, pady=2)
+
+
+# --- FENÊTRE ENTRAÎNEMENT IA vs IA (Q-LEARNING) ---
+window_rl = tkinter.Toplevel()
+window_rl.title("Q-Learning — IA vs IA")
+window_rl.config(background=COLOR_DEEP_BLACK)
+window_rl.geometry("920x580")
+window_rl.resizable(False, False)
+window_rl.withdraw()
+window_rl.protocol("WM_DELETE_WINDOW", retour_menu_depuis_rl)
+
+rl_main = tkinter.Frame(window_rl, background=COLOR_DEEP_BLACK)
+rl_main.pack(fill="both", expand=True, padx=16, pady=16)
+
+rl_left = tkinter.Frame(rl_main, background=COLOR_DEEP_BLACK)
+rl_left.pack(side="left", padx=(0, 20))
+
+tkinter.Label(
+    rl_left,
+    text="GRILLE D'ENTRAÎNEMENT",
+    font=("Impact", 14),
+    background=COLOR_DEEP_BLACK,
+    foreground=COLOR_GOLD_VICTORY,
+).pack(pady=(0, 8))
+
+rl_grid_frame = tkinter.Frame(rl_left, background=COLOR_GRID_LINE)
+rl_grid_frame.pack()
+
+rl_board = [[None] * 3 for _ in range(3)]
+for r in range(3):
+    for c in range(3):
+        b = tkinter.Label(
+            rl_grid_frame,
+            text="",
+            font=f_grid,
+            width=3,
+            height=1,
+            background=COLOR_TILE_BG,
+            foreground=COLOR_TEXT_MUTED,
+        )
+        b.grid(row=r, column=c, padx=4, pady=4, ipadx=8, ipady=8)
+        rl_board[r][c] = b
+
+tkinter.Label(
+    rl_left,
+    text="🟥 X  vs  🟩 O  — auto-apprentissage",
+    font=("Arial", 9),
+    background=COLOR_DEEP_BLACK,
+    foreground=COLOR_TEXT_MUTED,
+).pack(pady=10)
+
+rl_right = tkinter.Frame(rl_main, background=COLOR_DEEP_BLACK)
+rl_right.pack(side="left", fill="both", expand=True)
+
+ql_btn_train = create_gaming_button(
+    rl_right,
+    "▶  APPRENTISSAGE (Q-learning)",
+    _rl_toggle_training,
+    "#1565c0",
+    "#0d47a1",
+    f_btn,
+)
+ql_btn_demo = create_gaming_button(
+    rl_right,
+    "🎯  DÉMO (exploitation)",
+    _rl_start_demo,
+    "#2e7d32",
+    "#1b5e20",
+    f_btn,
+)
+
+hp_frame = tkinter.LabelFrame(
+    rl_right,
+    text=" Hyperparamètres ",
+    font=("Arial", 9, "bold"),
+    background=COLOR_DEEP_BLACK,
+    foreground=COLOR_TEXT_MUTED,
+)
+hp_frame.pack(fill="x", pady=10)
+
+for i, (lbl, default, from_, to, step) in enumerate([
+    ("α (apprentissage)", 0.1, 0.01, 1.0, 0.01),
+    ("γ (escompte)", 0.95, 0.1, 0.99, 0.01),
+    ("Épisodes", 3000, 100, 50000, 500),
+    ("Vitesse démo (ms)", 400, 50, 2000, 50),
+]):
+    tkinter.Label(
+        hp_frame, text=lbl, font=("Arial", 9),
+        background=COLOR_DEEP_BLACK, foreground="white",
+    ).grid(row=i, column=0, sticky="w", padx=8, pady=4)
+    sb = tkinter.Spinbox(
+        hp_frame, from_=from_, to=to, increment=step,
+        width=10, font=("Arial", 10),
+        bg=COLOR_TILE_BG, fg="white",
+    )
+    sb.delete(0, tkinter.END)
+    sb.insert(0, str(default))
+    sb.grid(row=i, column=1, padx=8, pady=4)
+
+rl_spin_alpha = hp_frame.grid_slaves(row=0, column=1)[0]
+rl_spin_gamma = hp_frame.grid_slaves(row=1, column=1)[0]
+rl_spin_episodes = hp_frame.grid_slaves(row=2, column=1)[0]
+rl_spin_speed = hp_frame.grid_slaves(row=3, column=1)[0]
+
+qt_frame = tkinter.Frame(rl_right, background=COLOR_DEEP_BLACK)
+qt_frame.pack(fill="x", pady=6)
+for txt, cmd in [
+    ("Sauvegarder Q", _rl_save_qtable),
+    ("Charger Q", _rl_load_qtable),
+    ("Reset Q", _rl_reset_agent),
+]:
+    tkinter.Button(
+        qt_frame, text=txt, font=("Arial", 9, "bold"),
+        bg=COLOR_TILE_BG, fg="white", relief="flat",
+        command=cmd, cursor="hand2",
+    ).pack(side="left", expand=True, fill="x", padx=2, ipady=6)
+
+rl_progress = ttk.Progressbar(rl_right, mode="determinate")
+
+stats_frame = tkinter.LabelFrame(
+    rl_right, text=" Statistiques ",
+    font=("Arial", 9, "bold"),
+    background=COLOR_DEEP_BLACK, foreground=COLOR_TEXT_MUTED,
+)
+stats_frame.pack(fill="x", pady=8)
+
+rl_lbl_episode = tkinter.Label(stats_frame, text="0", font=("Arial", 10, "bold"),
+    background=COLOR_DEEP_BLACK, foreground=COLOR_GOLD_VICTORY)
+rl_lbl_epsilon = tkinter.Label(stats_frame, text="1.000", font=("Arial", 10),
+    background=COLOR_DEEP_BLACK, foreground="white")
+rl_lbl_wins = tkinter.Label(stats_frame, text="—", font=("Arial", 9),
+    background=COLOR_DEEP_BLACK, foreground=COLOR_GREEN_NEON)
+rl_lbl_rate = tkinter.Label(stats_frame, text="—", font=("Arial", 9),
+    background=COLOR_DEEP_BLACK, foreground=COLOR_TEXT_MUTED)
+
+for i, (t, w) in enumerate([
+    ("Épisodes :", rl_lbl_episode),
+    ("ε :", rl_lbl_epsilon),
+    ("Résultats :", rl_lbl_wins),
+    ("", rl_lbl_rate),
+]):
+    tkinter.Label(stats_frame, text=t, font=("Arial", 9),
+        background=COLOR_DEEP_BLACK, foreground=COLOR_TEXT_MUTED,
+    ).grid(row=i, column=0, sticky="w", padx=8, pady=2)
+    w.grid(row=i, column=1, sticky="w", padx=8, pady=2)
+
+rl_log = tkinter.Text(
+    rl_right, height=8, font=("Consolas", 9),
+    bg="#1e1e1e", fg="#d4d4d4", relief="flat",
+)
+rl_log.pack(fill="both", expand=True, pady=(8, 0))
+
+create_gaming_button(
+    rl_right, "RETOUR AU MENU", retour_menu_depuis_rl,
+    COLOR_DEEP_BLACK, COLOR_TILE_BG, ("Arial", 10, "bold"),
+    fg_color=COLOR_TEXT_MUTED, pady=4,
+)
+
+# Chargement automatique si table Q présente
+_default_qt = os.path.join(_SCRIPT_DIR, QTABLE_DEFAULT)
+if os.path.exists(_default_qt):
+    try:
+        ql_agent.load_q_table(_default_qt, for_inference=True)
+    except Exception:
+        pass
 
 window_login.mainloop()
