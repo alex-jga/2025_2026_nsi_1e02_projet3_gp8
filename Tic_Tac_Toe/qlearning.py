@@ -1,16 +1,10 @@
-"""
-Q-Learning — Morpion (Tic Tac Toe)
-==================================
-Apprentissage par renforcement tabulaire pour le morpion 3×3.
-État = plateau + joueur courant ; actions = cases libres (0..8).
-"""
 
 import json
 import random
 
 playerX = "X"
 playerO = "O"
-EMPTY_CELL = " "  # marqueur fixe pour une case vide (9 caractères toujours)
+EMPTY_CELL = " " 
 N_ACTIONS = 9
 
 R_WIN = 10.0
@@ -22,12 +16,12 @@ QTABLE_DEFAULT = "qtable_morpion.json"
 
 
 def _encode_cell(cell):
-    """Encode une case : X, O ou espace (vide)."""
+   
     return cell if cell in (playerX, playerO) else EMPTY_CELL
 
 
 def board_to_key(cells, current_player):
-    """Clé d'état : exactement 9 cases encodées + '|' + joueur courant."""
+    
     board = "".join(_encode_cell(c) for c in cells[:9])
     if len(board) < 9:
         board = board.ljust(9, EMPTY_CELL)
@@ -35,7 +29,7 @@ def board_to_key(cells, current_player):
 
 
 def key_to_cells(state_key):
-    """Décode la partie plateau d'une clé d'état."""
+    
     board_part = state_key.rsplit("|", 1)[0] if "|" in state_key else state_key[:9]
     board_part = board_part.ljust(9, EMPTY_CELL)[:9]
     return [c if c in (playerX, playerO) else "" for c in board_part]
@@ -50,7 +44,7 @@ def rc_to_index(row, col):
 
 
 def check_winner_cells(cells):
-    """Retourne 'X', 'O', 'Tie' ou None."""
+    
     lines = [
         (0, 1, 2), (3, 4, 5), (6, 7, 8),
         (0, 3, 6), (1, 4, 7), (2, 5, 8),
@@ -65,7 +59,7 @@ def check_winner_cells(cells):
 
 
 class TicTacToeEnv:
-    """Environnement morpion pour l'entraînement."""
+    
 
     def __init__(self):
         self.cells = [""] * 9
@@ -81,10 +75,7 @@ class TicTacToeEnv:
         return [i for i in range(9) if c[i] == ""]
 
     def step(self, action):
-        """
-        Joue l'action pour le joueur courant.
-        Retourne (next_state, reward, done) du point de vue du joueur qui a joué.
-        """
+        
         if self.cells[action] != "":
             return board_to_key(self.cells, self.current), R_LOSE, True
 
@@ -112,7 +103,7 @@ class TicTacToeEnv:
 
 
 class QLearningAgent:
-    """Agent Q-learning avec table Q en dictionnaire."""
+    
 
     def __init__(self, alpha=0.1, gamma=0.95, epsilon=1.0):
         self.alpha = alpha
@@ -173,12 +164,7 @@ class QLearningAgent:
             json.dump(data, f, indent=2)
 
     def load_q_table(self, filepath, for_inference=False):
-        """
-        Charge une table Q sauvegardée.
-
-        for_inference=True : epsilon=0 (démo / partie vs humain, pas d'exploration).
-        for_inference=False : conserve epsilon du fichier (reprise d'entraînement).
-        """
+       
         with open(filepath, "r", encoding="utf-8") as f:
             data = json.load(f)
         self.q_table = {k: list(v) for k, v in data["q_table"].items()}
@@ -198,10 +184,7 @@ class QLearningAgent:
 
 
 def run_training_episode(agent, env):
-    """
-    Un épisode d'auto-apprentissage (IA vs IA) : le même agent joue X et O.
-    Retourne (total_reward_x_perspective, winner, path_cells_list).
-    """
+   
     state = env.reset()
     path = [list(env.cells)]
     total_reward = 0.0
@@ -236,15 +219,12 @@ def run_training_episode(agent, env):
 
 
 def board_from_env_cells(cells):
-    """Convertit la liste plate en grille 3×3 de caractères."""
+    
     return [[cells[r * 3 + c] or " " for c in range(3)] for r in range(3)]
 
 
 def q_move_for_player(agent, board_buttons, player):
-    """
-    Coup greedy pour le joueur donné à partir de l'état du plateau UI.
-    board_buttons : grille 3×3 de widgets tkinter Button.
-    """
+    
     cells = []
     for r in range(3):
         for c in range(3):
