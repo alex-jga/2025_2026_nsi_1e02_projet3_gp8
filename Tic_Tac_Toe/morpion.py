@@ -290,7 +290,7 @@ def lancer_partie(ia_mode):
 
 
 def ouvrir_entrainement_rl():
-    """Ouvre la fenêtre d'entraînement IA vs IA (Q-learning)."""
+    
     window_main.withdraw()
     window_rl.deiconify()
     _rl_refresh_stats()
