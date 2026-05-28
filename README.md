@@ -1,6 +1,6 @@
 # 2025_2026_nsi_1e02_projet3_gp8
 
-Groupe 8
+Groupe 8 
 
 ###############################################################################################################################################
 
@@ -9,6 +9,9 @@ Alexandre Joseph Isaïas Jaouen Garcia
 
 ###############################################################################################################################################
 
+Python, Tkinter, Json
+
+###############################################################################################################################################
 Idées de projet:
 
 -Airbuds like:
@@ -99,16 +102,27 @@ qui avec les parties des joueurs va s'instruire pour ne plus perdre
 
 Plan du morpion:
 
-Architecture MVC:
-Main qui appelle le controller et le view 
-
 Création d'une premiere fenetre d'accueil qui propose 2 choix (2 boutons avec tkinter):
     → J1 vs J2
     → J1 vs Algorithme d'apprentissage
+    → Quitter
 
 1ere sous fenetre J1 vs J2:
 
-Affiche le tableau et un bouton pour commencer la partie
-Puis ajouter des cases clickables
+Affiche le tableau et propose 3 options: rejouer, quitter et retourner au menu
+Affiche a qui le tour de jouer 
+Affichage des cases prises avec les croix et les cercles
+Détevtion lorsque 3 croix ou 3 cercles sont alignés et affichage du gagnant
+Affiche les 3 mm options rejouer de quitter ou de retourner au menu
 
-https://chatgpt.com/s/t_69d5109b29ac8191ba57eb4270371410
+2eme fenetre J1 vs IA : 
+
+Affiche le tableau et propose 3 options: rejouer, quitter et retourner au menu
+Affiche a qui le tour de jouer 
+Affichage des cases prises avec les croix et les cercles
+Détetion lorsque 3 croix ou 3 cercles sont alignés et affichage du gagnant
+Affiche les 3 mm options rejouer de quitter ou de retourner au menu
+
+3eme fenetre IA vs IA : 
+
+qlearning fortement inspiré du lapin 
